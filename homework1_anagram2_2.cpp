@@ -1,4 +1,4 @@
-//宿題2
+//宿題2 おまけ(手動入力して調べる)
 #include <iostream>
 #include <algorithm>
 #include <fstream>
