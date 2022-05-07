@@ -15,7 +15,7 @@ int main()
 
     string buf;
     ifstream ifs;
-    ifs.open("word.txt");
+    ifs.open("words.txt");
     if (!ifs)
     {
         cerr << "ファイルを開けませんでした" << endl;
