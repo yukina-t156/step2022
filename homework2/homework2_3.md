@@ -22,7 +22,6 @@
 struct node{
     string url; //自身のURL
     node* prev; //初期値はNULL
-    node* now;  //自身のポインタ
     node* next; //初期値はNULL
 };
 ```
@@ -56,9 +55,9 @@ struct node{
                 B.next.prev = B.prev.next;
             }
             B.prev = end;
-            B.prev.next = B.now;
+            B.prev.next = &B;
             B.next = NULL;
-            end = B.now;
+            end = &B;
         }
         ```
     キャッシュ内にはデータA,データB,データCが存在  
@@ -91,7 +90,6 @@ struct node{
 
 ***
 ### 問題点
-- メモリの使用量が多い
-- ポインタの動きが不安なのでこれ通りのコードだと動かないかもしれない 
+- メモリの使用量が多い?
+- これ通りだと動かないかもしれない。ポインタの動きが不安。 
 - ハッシュとリストで独立して管理している。うまく整合性がとれているか不安
-        
