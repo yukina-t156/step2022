@@ -22,7 +22,7 @@ for i in range(n):
         c[i, j] = 0
 
 # test_kaisuu回繰り返して計測
-test_kaisuu = 10
+test_kaisuu = 100
 
 begin = time.time() # 計測開始
 for kaisuu in range(test_kaisuu):

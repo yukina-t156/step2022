@@ -9,7 +9,10 @@
 int main()
 {
     int N;
+    std::cout <<"N :";
     std::cin >> N;
+//  計測した時はNは標準入力からではなくここから受け取った
+//    N = 20;
     std::chrono::system_clock::time_point start, end;
     std::vector<std::vector<int> > A(N, std::vector<int>(N));
     std::vector<std::vector<int> > B(N, std::vector<int>(N));
@@ -24,7 +27,7 @@ int main()
         }
     }
 
-    int test_kaisuu = 10; // test_kaisuu回計測して割る
+    int test_kaisuu = 100; // test_kaisuu回計測して割る
 
     //計測開始
     start = std::chrono::system_clock::now();
@@ -42,7 +45,7 @@ int main()
                 {
                     c += (A[i][p] * B[p][j]);
                 }
-                C[i][j] = c; 
+                C[i][j] = c;
             }
         }
     }
