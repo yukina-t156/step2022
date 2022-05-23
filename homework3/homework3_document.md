@@ -51,6 +51,7 @@ testcaseをruncaseに追加
 ***
 # 宿題3 //未
 (,)の分もtoken,prioritiesに保存する(priorityの受け渡しができないので)
+->処理をしないならtokensに入れる必要はないのでは?(逆に添字がずれるから入れない方がいい？)
 evaluateで出てきた時に何もせずprioritiesとtokensから削除する
 - *,/,(の優先度を上げる  
   - *,/の時
@@ -70,7 +71,7 @@ evaluateで出てきた時に何もせずprioritiesとtokensから削除する
 
 ## 手順1
 - 'type': 'PAREN'を追加
-- read_leftparen、read_rightparenを作成
+- read_left_paren、read_right_parenを作成
  - stackをtokenizeに追加し引数、返り値に追加
 - tokenizeに'(',')'の分岐を追加
 - 左右の区別は優先度のみでOK
@@ -106,25 +107,33 @@ def read_right_paren(line, index, last_priority, left_st):
 1+(1+(1+1+1)+1)+1  
  01 12 2 2 11 00  
  のようになるように  
-- ベースの変数を作り、'('と')'で更新し常にpriorityに足すようにする  
+### ベースの変数を作り、'('と')'で更新し常にpriorityに足すようにする  
 - read_内で入れなくてもtokenize内だけで処理できそう？  
 -  初期のbaseは0に  
--  -10とかにならないように last_priorityにはbaseで揃える前のものを渡す(-baseにすれば良い)
+-  -10とかにならないように last_priorityにはbaseで揃える前のものを渡す(priorities[-1]-baseを渡せば良い)
+-  tokenize内で宣言
+-  read_に渡す際にpriorities[-1]-baseする
+-  '('の時にbaseを増やす
+-  ')'の時にbaseを戻す
 
 ## 手順2
 read_asterisk, read_slash内のpriorityの処理を変更
 - 前が'('だったら1になるパラメータleft_paramをやむなく追加  
-(あまり変なパラメータを作りたくないが、tokensを全て渡すよりは良いかと思った)  
+(あまり変なパラメータを作りたくないが、tokensを全て渡すよりは良いかと思った)
 '(('のように連続するケースでも大丈夫
   - *,/の時
     - 前が+,-の時は+1
     - 前が*,/の時は宿題1と同じ
     - 前が(の時は(+1 
-    - 前が)の時は)と同じ
+    - 前が)の時は)と同じ  
 
+->baseを加えたことにより解決？
 ## 手順３
+- evaluate内の処理
+- 出てきた時に何もせずprioritiesとtokensから削除する
+- 
 
 ## メモ  
 read_内のpriorityを変更させる部分も関数にできそう  
 変数の付け方上手になりたい!  
-[https://qiita.com/Ted-HM/items/7dde25dcffae4cdc7923]とかリーダブルコードとかちゃんと読む
+[https://qiita.com/Ted-HM/items/7dde25dcffae4cdc7923] とかリーダブルコードとかちゃんと読む
