@@ -84,6 +84,9 @@ def bin_operation(token_type, num1, num2):  # 二項演算をして値を返す�
     elif token_type == 'ASTERISK':
         return num1*num2
     elif token_type == 'SLASH':
+        if num2==0:
+            print('Invalid syntax')
+            exit(1)
         return num1/num2
     else:
         print('Invalid syntax')
