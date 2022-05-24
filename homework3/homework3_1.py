@@ -57,17 +57,13 @@ def tokenize(line):
         # 以下に1つ前のprioritiesからの増減を表すpriorityを追加
         else:  # typeの時
             if line[index] == '+':
-                (token, index, priority) = read_plus(
-                    line, index, priorities[-1])
+                (token, index, priority) = read_plus(line, index, priorities[-1])
             elif line[index] == '-':
-                (token, index, priority) = read_minus(
-                    line, index, priorities[-1])
+                (token, index, priority) = read_minus(line, index, priorities[-1])
             elif line[index] == '*':
-                (token, index, priority) = read_asterisk(
-                    line, index, priorities[-1])
+                (token, index, priority) = read_asterisk(line, index, priorities[-1])
             elif line[index] == '/':
-                (token, index, priority) = read_slash(
-                    line, index, priorities[-1])
+                (token, index, priority) = read_slash(line, index, priorities[-1])
             else:
                 print('Invalid character found: ' + line[index])
                 exit(1)
@@ -105,8 +101,7 @@ def evaluate(tokens, priorities):  # prioritiesを受け取る
                     if tokens[index-2]['type'] == 'NUMBER':
                         num = bin_operation(
                             tokens[index - 1]['type'], tokens[index-2]['number'], tokens[index]['number'])  # 演算結果
-                        tokens[index-2] = {'type': 'NUMBER',
-                                           'number': num}  # 組にして入れる
+                        tokens[index-2] = {'type': 'NUMBER','number': num}  # 組にして入れる
                         del tokens[index-1:index+1]  # tokensの更新
                         del priorities[int(index/2)]  # prioritiesの更新
                         index -= 3  # 削除分減らす(3文字減らして1文字増やす)

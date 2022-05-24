@@ -39,16 +39,15 @@ def read_minus(line, index, last_priority):
     return token, index + 1, priority  # 優先度は0
 
 
-def read_asterisk(line, index, last_priority):  # 追加 *を読み込む
+def read_asterisk(line, index, last_priority):
     token = {'type': 'ASTERISK'}
-    # (,)に対応させて変更
     priority = 1
     if last_priority > 0:
         priority = last_priority
     return token, index + 1, priority  # 前が+,-なら+1,前が*,/なら増減0
 
 
-def read_slash(line, index, last_priority):  # 追加 /を読み込む
+def read_slash(line, index, last_priority):
     token = {'type': 'SLASH'}
     priority = 1
     if last_priority > 0:
@@ -57,25 +56,25 @@ def read_slash(line, index, last_priority):  # 追加 /を読み込む
 
 
 def read_left_paren(line, index, last_priority, left_st):
-    token = {'type': 'PAREN'}
     left_st.append(last_priority)
 #  return token, index + 1, last_priority, left_st  # last_priorityに加えなくてもbaseが加わるからOK
     return index + 1, last_priority, left_st  # last_priorityに加えなくてもbaseが加わるからOK
 
 
 def read_right_paren(line, index, last_priority, left_st):
-    #  token = {'type': 'PAREN'}
+    if(len(left_st)==0):
+        print('Invalid syntax')
+        exit(1)
     priority = left_st.pop()
-#  return token, index + 1, priority, left_st
     return index + 1, priority, left_st
 
 
 def tokenize(line):
     tokens = []
-    priorities = [0]  # 追加 最初にダミー分の初期値0を入れておく
+    priorities = [0]  # 最初にダミー分の初期値0を入れておく
     left_st = deque([])  # スタックを用意
     priority_base = 0  # priorityの基準をセット
-    paran_loc=[] # 後で()の優先度を消去するため
+    paran_loc = []  # 後で'(',')'の優先度を消去するため
     index = 0
     while index < len(line):
         if line[index].isdigit():
@@ -83,28 +82,22 @@ def tokenize(line):
         # 以下に1つ前のprioritiesからの増減を表すpriorityを追加
         else:  # typeの時
             if line[index] == '+':
-                (token, index, priority) = read_plus(
-                    line, index, priorities[-1]-priority_base)
+                (token, index, priority) = read_plus(line, index, priorities[-1]-priority_base)
             elif line[index] == '-':
-                (token, index, priority) = read_minus(
-                    line, index, priorities[-1]-priority_base)
+                (token, index, priority) = read_minus(line, index, priorities[-1]-priority_base)
             elif line[index] == '*':
-                (token, index, priority) = read_asterisk(
-                    line, index, priorities[-1]-priority_base)
+                (token, index, priority) = read_asterisk(line, index, priorities[-1]-priority_base)
             elif line[index] == '/':
-                (token, index, priority) = read_slash(
-                    line, index, priorities[-1]-priority_base)
+                (token, index, priority) = read_slash(line, index, priorities[-1]-priority_base)
             elif line[index] == '(':
                 paran_loc.append(len(priorities))
-                (index, priority, left_st) = read_left_paren(
-                    line, index, priorities[-1]-priority_base, left_st)
+                (index, priority, left_st) = read_left_paren(line, index, priorities[-1]-priority_base, left_st)
                 priority_base += 2  # priority_baseを変更前にreadに渡しておく
                 priorities.append(priority+priority_base)
                 continue  # tokenがないためpush_backできない、ここで終わらせておく
             elif line[index] == ')':
                 paran_loc.append(len(priorities))
-                (index, priority, left_st) = read_right_paren(
-                    line, index, priorities[-1]-priority_base, left_st)
+                (index, priority, left_st) = read_right_paren(line, index, priorities[-1]-priority_base, left_st)
                 priority_base -= 2
                 priorities.append(priority+priority_base)
                 continue
@@ -115,9 +108,10 @@ def tokenize(line):
             priorities.append(priority+priority_base)
         tokens.append(token)
 
-    for i in range(len(paran_loc)):#paranの優先度を削る(evaluateで添え字がずれないように)
-        print("paran[i]",paran_loc[i])
+    for i in range(len(paran_loc)):  # paranの優先度を削る(evaluateで添え字がずれないように)
         del priorities[paran_loc[i]-i]
+    if len(left_st)>0:
+        print("warning: ) is not enough!") #)が足りない時
     return tokens, priorities  # priorityを返り値に追加
 
 
@@ -135,7 +129,7 @@ def bin_operation(token_type, num1, num2):  # 二項演算をして値を返す�
         exit(1)
 
 
-def print_fomula(tokens):  # ()は出せない...
+def print_fomula(tokens):  # デバッグ用 tokensに入れてないので()は出せない...
     for token in tokens:
         if(token['type'] == 'NUMBER'):
             print(token['number'], end='')
@@ -160,23 +154,18 @@ def evaluate(tokens, priorities):  # prioritiesを受け取る
     if tokens[-1]['type'] != 'NUMBER':  # 最後のtokensのみおかしい時に弾く
         print('Invalid syntax')
         exit(1)
-    print("===================")
-#    print(*tokens)
-    print_fomula(tokens)
-    print(*priorities)
     while max_priority > 0:  # max_priorityが0になるまで処理
         index = 1  # 1つ目の数字 毎ループ初期化するのでこの位置に
         while index < len(tokens):
             if tokens[index]['type'] == 'NUMBER':  # 数字が来た時に演算を実行
                 if priorities[int(index/2)] == max_priority:
                     if tokens[index-2]['type'] == 'NUMBER':
-                        num = bin_operation(
-                            tokens[index - 1]['type'], tokens[index-2]['number'], tokens[index]['number'])  # 演算結果
-                        tokens[index-2] = {'type': 'NUMBER',
-                                           'number': num}  # 組にして入れる
+                        # 計算する
+                        num = bin_operation(tokens[index - 1]['type'], tokens[index-2]['number'], tokens[index]['number'])
+                        tokens[index-2] = {'type': 'NUMBER','number': num}  # 組にして入れる
                         del tokens[index-1:index+1]  # tokensの更新
                         del priorities[int(index/2)]  # prioritiesの更新
-                        index -= 3  # 削除分減らす(3文字減らして1文字増やす)
+                        index -= 3  # 削除分減らす(3文字減らしてwhile文の最後の方で1文字増やす)
                     else:
                         print('Invalid syntax')
                         exit(1)
@@ -185,12 +174,7 @@ def evaluate(tokens, priorities):  # prioritiesを受け取る
                     exit(1)
             index += 1
         max_priority -= 1
-        print_fomula(tokens)
-        print(*priorities)
 
-#    print("__________________")
-#    print(*tokens)
-#    print(*priorities)
     # priority==0の時のみansを更新する
     index = 1  # 初期化
     while index < len(tokens):
@@ -221,15 +205,22 @@ def test(line):
 def run_test():
     print("==== Test started! ====")
     # テストケースを追加
-#    test("1+2")
-#    test("1.0+2.1-3")
-#    test("1+2*3*4+1")
+    test("1+2")
+    test("1.0+2.1-3")
+    test("1+2*3*4+1")
     test("(1+2)")
     test("(1*2)")
-    test("(1+2)*3")
-    test("(1+2*3)*4")
-    test("1*3*(3+1*4)-3")
-    test("1+(1+(1+(1+1)))+1")
+    test("(3.0+4*(2-1))/5")
+    test("1.4+(1.3+(1.2+(1.0+1.1)))+1.5")
+    test("1+(1*(1+(1*2+1))*4)+1")
+    test("((((1+2*3))*(4)))")
+    test("(1+2*3)-2")
+    test("(2*3*4+1)/2")
+    test("((1*2)*3)*2.5")
+    test("(0)")
+
+
+
     print("==== Test finished! ====\n")
 
 
