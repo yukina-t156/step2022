@@ -14,9 +14,17 @@ homework4_1
 │           ├── pages_small.txt
 │           └── pages.txt
 ├── README.md
+├── homework4_ranking.cpp
 ├── homework4_1_DFS.cpp
 └── homework4_1_BFS.cpp
 ```
+# ファイル説明
+- homework4_1_DFS.cpp
+  - DFSです。スタックで実装しています。
+- homework4_1_BFS.cpp
+  - BFSです。
+- homework4_ranking.cpp
+  - おまけです。ページを参照しようとした回数が出ます。探索はBFSと一緒です
 # 実行方法
 ## C++
 テスト環境 : gcc  
@@ -27,6 +35,15 @@ g++ -w homework4_1_DFS.cpp && ./a.out
 ```
 g++ -w homework4_1_BFS.cpp && ./a.out
 ```
+```
+g++ -w homework4_ranking.cpp && ./a.out
+```
+# 注意
+- pages/linksの読み込みおよび探索に時間がかかります。
+- show routeをYesにするとディレクトリhomework4_1内に結果の出力ファイル```route.txt```が生成されます。
+- 既に該当ディレクトリ内にroute.txtが存在する場合には上書きされます。
+- rankingでshow rankingをYesにすると同様に```rank.txt```が生成されます。  
+
 # 実行例
 ```
 Now: reading pages... (Please wait a moment)
@@ -82,7 +99,26 @@ Google (457783)
 -> 渋谷 (22557)
 ______________________
 ```
-# 注意
-- pages/linksの読み込みおよび探索に時間がかかります。
-- show routeをYesにするとディレクトリhomework4_1内に結果の出力ファイルroute.txtが生成されます。  
-- 既に該当ディレクトリ内にroute.txtが存在する場合には上書きされます。
+rank.txtの例
+```
+start: Google (457783)
+goal: 渋谷 (22557)
+Ave: 2.86893 (6302pages)
+______________________
+66回 :Android (627560)
+64回 :YouTube (469772)
+63回 :会長 (212818)
+62回 :Google_Finance (268948)
+60回 :Nexus_One (977528)
+60回 :Google_Chrome (774205)
+60回 :Gmail (212318)
+60回 :CEO (170957)
+59回 :Google_Chrome_OS (908095)
+59回 :ポール・オッテリーニ (906246)
+59回 :ページランク (8579)
+59回 :パロアルト研究所 (82934)
+59回 :Google_Apps (816340)
+59回 :Google.org (751791)
+59回 :グーグル八分 (673071)
+(省略)
+```

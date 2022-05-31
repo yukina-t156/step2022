@@ -118,7 +118,21 @@ int main()
     std::cout << "Please input target (example:渋谷)\n>> ";
     std::cin >> goal_str;
     std::pair<std::string, std::string> goal = std::make_pair("-1", goal_str); //ゴール地点を設定
-
+    bool goal_is_exist = false;
+    for (const auto &page : pages){
+        // pagesの情報を一つずつ取り出しpageに格納
+        if (page.second == goal_str) // page = (id, "Google")
+        {
+            goal_is_exist = true;
+            break;
+        }
+    }
+    if(!goal_is_exist){
+        //開始地点が見つからなかった場合
+        std::cout << "Not found: " << goal.second << std::endl;
+        exit(EXIT_FAILURE);
+    }
+    
     /*探索開始*/
     std::cout << "Now exploring..." << std::endl;
     long long visit_counter = 0; //訪れたページ数
