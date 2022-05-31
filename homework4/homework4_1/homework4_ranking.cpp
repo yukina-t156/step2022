@@ -12,9 +12,9 @@ void show_ranking(std::pair<std::string, std::string> &start, std::pair<std::str
 std::map<std::string, std::string> &pages, std::map<std::string, long long> &checked)
 {
     std::priority_queue<std::pair<long long, std::string>,
-                        std::vector<std::pair<long long, std::string> >, std::less<std::pair<long long, std::string> > >
-        fleq;
-
+                        std::vector<std::pair<long long, std::string> >,
+                        std::less<std::pair<long long, std::string> > > fleq;
+    // 値が大きい順に取り出せるpriority_que
     std::cout << "\"rank.txt\"に出力します" << std::endl;
     FILE *fp_output;
     std::ofstream ofs;
@@ -29,25 +29,26 @@ std::map<std::string, std::string> &pages, std::map<std::string, long long> &che
     std::cout << "出力中..." << std::endl;
     long long counter = 0;
     long long sum = 0;
-    for (auto iter = checked.begin(); iter != checked.end(); iter++)
+    for (auto iter = checked.begin(); iter != checked.end(); iter++)//mapの全要素を取り出す
     {
         // first: key, second: value
-        if (iter->second != 0)
+        if (iter->second != 0)//回数が1回以上の要素のみ
         {
-            fleq.push(std::make_pair(iter->second, iter->first));
-            sum += iter->second;
-            counter++;
+            fleq.push(std::make_pair(iter->second, iter->first)); //priority_queに(参照回数,ID)で格納
+            sum += iter->second; // 合計に加える
+            counter++; // カウンタを増やす
         }
     }
 
     ofs << "start: " << start.second << " (" << start.first << ")" << std::endl;
     ofs << "goal: " << goal.second << " (" << goal.first << ")" << std::endl;
-    ofs << "Ave: " << float(sum) / float(counter) << " (" << counter << "pages)"<< std::endl;
+    ofs << "Ave: " << float(sum) / float(counter) << " (" << counter << "pages)"<< std::endl; //平均回数とページ数
     ofs << "______________________" << std::endl;
-    while (fleq.size() != 0)
+    while (fleq.size() != 0) //priority_queを全て取り出す
     {
+        //回数が大きい順に取り出し出力
         auto tmp = fleq.top();
-        fleq.pop();
+        fleq.pop(); //忘れずpopする
         if (tmp.first != 0)
         {
             ofs << tmp.first << "回 :" << pages[tmp.second] << " (" << tmp.second << ")" << std::endl;
