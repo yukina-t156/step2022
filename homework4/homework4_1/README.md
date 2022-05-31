@@ -13,7 +13,6 @@ homework4_1
 │           ├── links.txt
 │           ├── pages_small.txt
 │           └── pages.txt
-├
 ├── README.md
 ├── homework4_1_DFS.cpp
 └── homework4_1_BFS.cpp
@@ -84,6 +83,6 @@ Google (457783)
 ______________________
 ```
 # 注意
-- pages/linksの読み込みおよび探索には時間がかかります。
+- pages/linksの読み込みおよび探索に時間がかかります。
 - show routeをYesにするとディレクトリhomework4_1内に結果の出力ファイルroute.txtが生成されます。  
 - 既に該当ディレクトリ内にroute.txtが存在する場合には上書きされます。
