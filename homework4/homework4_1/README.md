@@ -28,7 +28,7 @@ homework4_1
 # 実行方法
 ## C++
 テスト環境 : gcc  
-(Apple clang version 13.1.6 (clang-1316.0.21.2.5))
+13.1.6
 ```
 g++ -w homework4_1_DFS.cpp && ./a.out
 ```
