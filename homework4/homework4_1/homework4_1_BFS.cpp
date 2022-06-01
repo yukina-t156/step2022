@@ -6,6 +6,7 @@
 #include <sstream>
 #include <string>
 #include <queue> //queueを使用
+#include <stack> //環境次第ではないとCEかも
 
 //経路を書き出す関数
 void show_route(std::pair<std::string, std::string> &start, std::pair<std::string, std::string> &goal,
@@ -61,8 +62,8 @@ int main()
         //処理が長くなることがあるのでメッセージを出しておく
         std::cout << "Now: reading pages... (Please wait a moment)" << std::endl;
 
-        std::ifstream file(".gitignore/data/pages.txt");
-        //std::ifstream file(".gitignore/data/pages_small.txt"); //小さいテストケース
+        std::ifstream file("./data/pages.txt");
+        //std::ifstream file("./data/pages_small.txt"); //小さいテストケース
         std::string data;
         while (std::getline(file, data))
         {                                                                     // 1行読み込む
@@ -77,8 +78,8 @@ int main()
     {
         // linksを読み込む
         std::cout << "Now: reading links... (Please wait a moment)" << std::endl;
-        std::ifstream file(".gitignore/data/links.txt");
-        //std::ifstream file(".gitignore/data/links_small.txt"); //小さいテストケース
+        std::ifstream file("./data/links.txt");
+        //std::ifstream file("./data/links_small.txt"); //小さいテストケース
         std::string data;
         while (std::getline(file, data))
         {

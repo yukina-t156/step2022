@@ -6,13 +6,13 @@
 
 ```
 homework4_1
-├────.gitignore
-│       └──data
-│           ├── graph_small.png
-│           ├── links_small.txt
-│           ├── links.txt
-│           ├── pages_small.txt
-│           └── pages.txt
+├──── data
+│       ├── graph_small.png
+│       ├── links_small.txt
+│       ├── links.txt
+│       ├── pages_small.txt
+│       └── pages.txt
+├── .gitignore
 ├── README.md
 ├── homework4_ranking.cpp
 ├── homework4_1_DFS.cpp
