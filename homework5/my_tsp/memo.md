@@ -196,6 +196,15 @@ input
 
 
 # 使用法
+以下のファイルをインクルードしてください
+```
+#include <iostream>
+#include <vector>
+#include <fstream>
+#include <string.h>
+#include "input.h"
+#include "output.h"
+```
 以下のような例を使用して記述する
 ```
 std::vector<std::pair<double,double> > cities; //街の座標ペア
