@@ -219,7 +219,8 @@ std::pair<double,double> tmp = input::csv_to_pair(s);
 <br>
 
 ## outputクラス
-print_tour : 配列tourをフォーマットし、idに対応した出力ファイルを作る
+print_tour : 配列tourをフォーマットし、results/{name}_{id}.csvに結果を出力する
+nameの欄はoptionalで、デフォルトは"sample"
 ``` 
-output::print_tour(tour, id);
+output::print_tour(tour, id, name);
 ```
