@@ -1,14 +1,15 @@
 # Homework 5
-sampleコードがpythonのみだったのですが書ける自信が無いので、C++に書き換えてみようと思います。  
+sampleコードがpythonのみだったけど書ける自信が無いので、C++に書き換える。  
 あとファイルがいっぱいあって何が何だかわからない。  
-使用方法の理解も兼ねてのメモを残しておきます。    
+使用方法の理解も兼ねてのメモ。    
 
 <!-- 目次 -->
 - [sampleの使用方法](#anchor1)
 - [sample codeを読む](#anchor2)
    - [sample codeの構成まとめ](#anchor3)
 - [C++で実装したい](#anchor4)
-  - [構成](#anchor5)
+  - [構成、仕様](#anchor5)
+  - [完成 + 使用方法](#anchor6)
 
 
 <a id="anchor1"></a>
@@ -135,8 +136,90 @@ tsp
 <a id="anchor5"></a>  
 
 # 以下C++実装パート
-全部関数にして1ファイルにまとめても良いけど、  
-せっかくなのでヘッダファイルでも作ろうかな、と言う気持ちになったので、ヘッダファイルを作ります。  
-C++で作ったことないけどCでやったことあるのでいけるべ！という軽率な判断を後で後悔しないと良いですね。  
-[こちら](https://docs.microsoft.com/ja-jp/cpp/build/walkthrough-creating-and-using-a-static-library-cpp?view=msvc-170)を参考に作っていきます。
+せっかくなのでヘッダファイルでも作ろうかな、と言う気持ちになったので、ヘッダファイルを作る。  
+[こちら](https://docs.microsoft.com/ja-jp/cpp/build/walkthrough-creating-and-using-a-static-library-cpp?view=msvc-170)を参考。
 
+# 仕様
+元のコードではCHALLENGEを一回で全て同時に実行しているが、入力で受け取るようにしようと思う。  
+以下、idをこの問題番号として表す。
+また、回答コードsolver_xx.cppに対応する任意の名前xxを利用する  
+
+*** 
+
+ディレクトリ構成の概形
+```
+tsp
+├──── results
+│        └── sample_i.csv
+├──── inputs
+│        └── input_i.csv
+├── README.md
+├── solver_xx.cpp
+├── input.h
+├── output.h
+└── output_verifier.py
+```
+
+
+
+## inputについて
+- input_{id}.csvを開く
+- 座標(x,y)を読み込み、リストにして返す
+
+## outputについて
+### 1.フォーマット
+- 下のように出力
+```
+input
+1
+2
+...
+```
+### 2.出力
+- result/{xx}_{id}.csvを開く
+  - ※ xxの部分はとりあえず変数で仮置きしておく。
+- フォーマット通りに出力
+
+
+## solver
+- これらのヘッダをincludeする
+- あとは解くだけ！(いちばんたいへん)
+
+<br>  
+<a id="anchor6"></a>  
+
+# できた。  
+もっと躓くと思ってこんなにしっかり仕様を書いたのに意外とあっさりできてしまった。  
+逆にしっかり考えたからできたのだと思うことにする。うれしいね。  
+
+<br>
+
+
+# 使用法
+以下のような例を使用して記述する
+```
+std::vector<std::pair<double,double> > cities; //街の座標ペア
+std::vector<int> tour; //訪ねる街の順番が先頭から順に格納された配列
+int id; //challengeの番号
+```
+## inputクラス
+
+read_csv : citiesにidの対応するcsvファイルからの座標を格納
+```
+input::read_csv(cities, id);
+```
+<br>
+
+csv_to_pair : string s (="x,y")をdoubleの組(x,y)にする
+```
+std::string s = "123.45,678.9";
+std::pair<double,double> tmp = input::csv_to_pair(s);
+// tmp = (123.45,678.9)
+```
+<br>
+
+## outputクラス
+print_tour : 配列tourをフォーマットし、idに対応した出力ファイルを作る
+``` 
+output::print_tour(tour, id);
+```

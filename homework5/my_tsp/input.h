@@ -14,7 +14,7 @@ namespace input
         return ret;
     }
 
-    // Usage: input::read(cities, id); //citiesに座標リストが作成される
+    // Usage: input::read_csv(cities, id); //citiesに座標リストが作成される
     void read_csv(std::vector<std::pair<double, double> > &dst, int id)
     {
         std::string srcfile = "inputs/input_" + std::to_string(id) + ".csv";
