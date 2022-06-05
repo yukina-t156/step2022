@@ -42,7 +42,7 @@ CHALLENGES = 7
 ```
 def generate_sample_output():
     for i in range(CHALLENGES):
-        cities = read_input(f'input_{i}.cs v') 
+        cities = read_input(f'input_{i}.csv') 
 ```
 組で要素を受け取っているfor文  
 (solver,name)=(solver_random,'random'),(solver_greedy, 'greedy')のような感じ
