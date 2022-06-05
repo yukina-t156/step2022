@@ -7,7 +7,7 @@ namespace output
     //フォーマットして出力
     void print_tour(std::vector<int> &tour,int id){
         std::string result_name = "sample";
-        std::string dstfile = "results/" + result_name + "_" + std::to_string(id) + ".csv";
+        std::string dstfile = "results/outputs/" + result_name + "_" + std::to_string(id) + ".csv";
         std::cout << "Write result in " + dstfile << std::endl;
 
         std::ofstream ofs(dstfile);
