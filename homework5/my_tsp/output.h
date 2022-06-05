@@ -21,6 +21,6 @@ namespace output
             ofs << tour[i] << std::endl;
         }
 
-        std::cout << "Finish." << std::endl;
+        std::cout << "Finished." << std::endl;
     }
 }

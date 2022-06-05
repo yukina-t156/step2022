@@ -18,6 +18,7 @@ namespace input
     void read_csv(std::vector<std::pair<double, double> > &dst, int id)
     {
         std::string srcfile = "inputs/input_" + std::to_string(id) + ".csv";
+        std::cout << "Reading " << srcfile  << "..." << std::endl;
         std::ifstream ifs(srcfile);
         if (!ifs)
         {
@@ -30,5 +31,6 @@ namespace input
         {
             dst.push_back(input::csv_to_pair(str_buf));
         }
+        std::cout << "Finished. Cities data made." << std::endl;
     }
 }
