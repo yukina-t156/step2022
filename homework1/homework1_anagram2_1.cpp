@@ -65,10 +65,10 @@ int main()
     ifstream ifs;
     ofstream result;
     ifs.open("words.txt");
-    result.open("result.txt", ios::out);
+    //result.open("result.txt", ios::out);
     //    result.open("small_result.txt", ios::out);
     //    result.open("medium_result.txt", ios::out);
-    //    result.open("large_result.txt", ios::out);
+        result.open("large_result.txt", ios::out);
     if (!ifs)
     {
         cerr << "ファイルを開けませんでした" << endl;
@@ -76,7 +76,7 @@ int main()
     }
 
     vector<string> dictionary(0);    //添え字が主キーになるようなイメージ
-    vector<vector<int>> elements(0); //添え字でdictionaryと対応付ける感じ
+    vector<vector<int> > elements(0); //添え字でdictionaryと対応付ける感じ
     int dict_num = 0;
     while ((getline(ifs, buf)))
     {
@@ -94,9 +94,9 @@ int main()
 
     /*調べる単語のリスト*/
     queue<string> word_list;
-    word_list.push("small.txt");
+ //   word_list.push("small.txt");
  //   word_list.push("medium.txt");
-  //  word_list.push("large.txt");
+    word_list.push("large.txt");
 
     while (word_list.size() > 0) // queueが空になるまで
     {

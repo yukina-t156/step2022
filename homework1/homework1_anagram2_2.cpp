@@ -73,7 +73,7 @@ int main()
     }
 
     vector<string> dictionary(0);    //添え字が主キーになるようなイメージ
-    vector<vector<int>> elements(0); //添え字でdictionaryと対応付ける感じ
+    vector<vector<int> > elements(0); //添え字でdictionaryと対応付ける感じ
     int dict_num = 0;
     while ((getline(ifs, buf)))
     {
