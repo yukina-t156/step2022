@@ -164,3 +164,6 @@
   - forループ
   - 文字列をつなげた場合、文字列をハッシュテーブルに入れた時:長さの分の計算量がかかる
   
+
+- 余談  
+せっかくなのでGitHubに草を生やしたいな...と思い[こちら](https://findy-code.io/engineer-lab/github-contributions-rule)を実行。なんで草が生えないんだろうと思ってた。
