@@ -4,7 +4,7 @@ namespace output
 {
     //フォーマットして出力
     // Usage: output::print_tour(tour, id, name<optional>); //tourが書き込まれる
-    void print_tour(std::vector<int> &tour,int id, std::string name = "sample"){
+    void print_tour(std::vector<int> &tour,int id, std::string name = "output"){
         std::string dstfile = "results/" + name + "_" + std::to_string(id) + ".csv";
         std::cout << "Write result in " + dstfile << std::endl;
 
