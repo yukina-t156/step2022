@@ -82,7 +82,7 @@ void *my_malloc(size_t size) {
 
   //ここを変えたい
   while (metadata){
-    if(metadata->size >= size){break;}
+    if(metadata->size >= size){break;} //whileの条件をこっちに持ってきた //まだちゃんと動く
     prev = metadata;
     metadata = metadata->next;
     //metadata->size >= size になった時終了
