@@ -90,6 +90,12 @@ void *my_malloc(size_t size) {
         //metadataがまだ一度も更新されていない時
         metadata = tmp_metadata;
         prev = tmp_prev;
+      }else{
+        if(tmp_metadata->size < metadata->size){
+        // 今見ているmetadataと更新されたmetadataを比べてサイズの小さい方を保持
+        metadata = tmp_metadata;
+        prev = tmp_prev;
+        }
       }
       break;
       } //whileの条件をこっちに持ってきた //まだちゃんと動く
@@ -97,7 +103,7 @@ void *my_malloc(size_t size) {
     tmp_metadata = tmp_metadata->next;
     //metadata->size >= size になった時終了
   }
-  //ここで実際使うmetadataへ渡す //動いた!
+  //ここで実際使うmetadataへ渡す //動いた! 
   /*
   metadata = tmp_metadata;
   prev = tmp_prev;
