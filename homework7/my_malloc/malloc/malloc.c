@@ -86,6 +86,11 @@ void *my_malloc(size_t size) {
   my_metadata_t *tmp_prev = NULL;
   while (tmp_metadata){
     if(tmp_metadata->size >= size){
+      if(!metadata){
+        //metadataがまだ一度も更新されていない時
+        metadata = tmp_metadata;
+        prev = tmp_prev;
+      }
       break;
       } //whileの条件をこっちに持ってきた //まだちゃんと動く
     tmp_prev = tmp_metadata;
@@ -93,9 +98,10 @@ void *my_malloc(size_t size) {
     //metadata->size >= size になった時終了
   }
   //ここで実際使うmetadataへ渡す //動いた!
+  /*
   metadata = tmp_metadata;
   prev = tmp_prev;
-
+*/
   // now, metadata points to the first free slot
   // and prev is the previous entry.
 
