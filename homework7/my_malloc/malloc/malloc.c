@@ -97,7 +97,7 @@ void *my_malloc(size_t size) {
         prev = tmp_prev;
         }
       }
-      break;
+//      break; //breakを消してみる
       } //whileの条件をこっちに持ってきた //まだちゃんと動く
     tmp_prev = tmp_metadata;
     tmp_metadata = tmp_metadata->next;
