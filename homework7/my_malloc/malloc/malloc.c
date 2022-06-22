@@ -48,7 +48,7 @@ my_heap_t my_heaps[5];
 
 //sizeを入れると対応するfree_list_binの番号を返す
 int which_free_list(size_t size){
-  if(size < 256)return 0;
+  if(size < 5000)return 0; //free_listの初期化が終わるまでは全て仮に0のリストに入れておく
   else if(size < 512)return 1;
   else if(size < 1024)return 2;
   else if(size < 2048)return 3;
@@ -57,15 +57,16 @@ int which_free_list(size_t size){
 
 void my_add_to_free_list(my_metadata_t *metadata) {
   assert(!metadata->next);
-  metadata->next = my_heaps[0].free_head;
-  my_heaps[0].free_head = metadata;
+  int bin_num = which_free_list(metadata->size);
+  metadata->next = my_heaps[bin_num].free_head;
+  my_heaps[bin_num].free_head = metadata;
 }
 
 void my_remove_from_free_list(my_metadata_t *metadata, my_metadata_t *prev) {
   if (prev) {
     prev->next = metadata->next;
   } else {
-    my_heaps[0].free_head = metadata->next;
+    my_heaps[which_free_list(metadata->size)].free_head = metadata->next;
   }
   metadata->next = NULL;
 }
@@ -93,7 +94,8 @@ void *my_malloc(size_t size) {
 
   //ここを変えたい
   /*辿るポインタと別に保持しておくポインタを用意してみた*/
-  my_metadata_t *tmp_metadata = my_heaps[0].free_head;
+  int bin_num = which_free_list(size);
+  my_metadata_t *tmp_metadata = my_heaps[bin_num].free_head;
   my_metadata_t *tmp_prev = NULL;
   while (tmp_metadata){
     if(tmp_metadata->size >= size){
