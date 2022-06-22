@@ -1,4 +1,5 @@
-// Free list binを実装したい
+// 空き領域をマージしたい
+// Free-list-binがそんなに早くないから後で治す
 //
 // >>>> malloc challenge! <<<<
 //
@@ -84,6 +85,7 @@ void my_remove_from_free_list(my_metadata_t *metadata, my_metadata_t *prev, int 
 
 
 void print_bin_size(){
+  //デバッグに使っていた
   for(int i = 0;i<7;i++){
     int counter = 0;
     my_metadata_t *tmp = my_heaps[i].free_head;
@@ -98,6 +100,17 @@ void print_bin_size(){
 //    printf("\nbin[%d]: %d free metadata!\n",i,counter); //dummy
   }
 //  printf("========================\n");
+}
+
+void *connect_right_free(my_metadata_t *meatdata1,my_metadata_t *metadata2){
+  
+  //binの変更はmallocで次にアクセスされる時にやる
+  meatdata1->size = meatdata1->size + metadata2->size + sizeof(my_metadata_t); //サイズを結合
+  meatdata1->next=metadata2->next;
+  meatdata2->next=NULL;
+  metadata2->size=0;
+  //metadata1,2にアクセスすることはないからいらないとは思うが、おまじないで...
+  return meatdata1;
 }
 
 //
@@ -128,7 +141,6 @@ void *my_malloc(size_t size) {
   // First-fit: Find the first free slot the object fits.
   // TODO: Update this logic to Best-fit!
  
-  //ここを変えたい
   /*辿るポインタと別に保持しておくポインタを用意してみた*/
   int bin_num = which_free_list(size);
   my_metadata_t *tmp_metadata = NULL;//対応するbinの先頭
@@ -150,6 +162,10 @@ void *my_malloc(size_t size) {
             metadata = tmp_metadata;
             prev = tmp_prev;
           }
+          /*
+          margeの影響をここらへんでいい感じにする
+          */
+
         }
       }
       tmp_prev = tmp_metadata;
@@ -235,7 +251,28 @@ void my_free(void *ptr) {
   // Add the free slot to the free list.
 //  printf("-[add (in my_free)]------------------\n");
 //  printf("metadata: size %zu  (add_to : %d)\n",metadata->size,which_free_list(metadata->size));
+
+/*右側が空きか調べる*/
+my_metadata_t *right = (my_metadata_t *) 1+metadata->size;
+  int bin = which_free_list(right->size);
+
+    my_metadata_t *tmp_metadata = NULL;//対応するbinの先頭
+    my_metadata_t *tmp_prev = NULL;
+    tmp_metadata = my_heaps[bin].free_head;
+    // bin_num番のfree_list_binから順に見ていく
+    while (tmp_metadata){
+      if(tmp_metadata==right){
+        break;
+      }
+      tmp_prev = tmp_metadata;
+      tmp_metadata = tmp_metadata->next;
+  }
+  if(!metadata){
   my_add_to_free_list(metadata);
+  }else{
+    my_add_to_free_list(connect_right_free(metadata,tmp_metadata));
+  }
+
 }
 
 // This is called at the end of each challenge.
