@@ -9,4 +9,5 @@
 
 ## docs  
 [malloc.c_read](https://docs.google.com/document/d/1PRZYNnSy5D96JMQll1I48Utjnmvg6kKWUlQSpD6TKHg/edit)  
-malloc.cを理解しようと頑張った痕跡 docsをまともに使ったの初めてかも
+malloc.cを理解しようと頑張った痕跡です  
+docsをまともに使ったの初めてかも
