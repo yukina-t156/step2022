@@ -1,4 +1,4 @@
-//うまくいかなかったけど参考に残しておく
+// First-fit 実装
 //
 // >>>> malloc challenge! <<<<
 //
@@ -76,43 +76,42 @@ void my_initialize() {
 // 4000. You are not allowed to use any library functions other than
 // mmap_from_system() / munmap_to_system().
 void *my_malloc(size_t size) {
-  my_metadata_t *metadata = my_heap.free_head;
+  my_metadata_t *metadata = NULL; //辿るポインタが別にあるのでNULLに
   my_metadata_t *prev = NULL;
   // First-fit: Find the first free slot the object fits.
   // TODO: Update this logic to Best-fit!
 
-  my_metadata_t *best_metadata = NULL;
-  my_metadata_t *best_prev = NULL;
-  int flg = 0;
-  while (metadata) {
-    if(!flg && metadata->size >= size){
-      //まだ一回もsizeを上回っていない
-      best_prev = prev;
-      best_metadata = metadata;
-      flg = 1;
-    }else if(flg){
-      //一回は更新されている
-      if(best_metadata->size > metadata->size){
-        //かつ、bestを下回っている時
-      best_prev = prev;
-      best_metadata = metadata;
+  //ここを変えたい
+  /*辿るポインタと別に保持しておくポインタを用意してみた*/
+  my_metadata_t *tmp_metadata = my_heap.free_head;
+  my_metadata_t *tmp_prev = NULL;
+  while (tmp_metadata){
+    if(tmp_metadata->size >= size){
+      if(!metadata){
+        //metadataがまだ一度も更新されていない時
+        metadata = tmp_metadata;
+        prev = tmp_prev;
+      }else{
+        if(tmp_metadata->size < metadata->size){
+        // 今見ているmetadataと更新されたmetadataを比べてサイズの小さい方を保持
+        metadata = tmp_metadata;
+        prev = tmp_prev;
+        }
       }
-    }
-    prev = metadata;
-    metadata = metadata->next;
+//      break; //breakを消してみる
+      } //whileの条件をこっちに持ってきた //まだちゃんと動く
+    tmp_prev = tmp_metadata;
+    tmp_metadata = tmp_metadata->next;
+    //metadata->size >= size になった時終了
   }
-
-  metadata = best_metadata;
-  prev = best_prev;
-/*
-  printf("-----------------------------------\n");
-  printf("metadata_size:%zu\n",best_metadata->size);
-  printf("metadata_size:%zu\n",metadata->size);
-  printf("size:%zu\n",size);
-  printf("\n");
+  //ここで実際使うmetadataへ渡す //動いた! 
+  /*
+  metadata = tmp_metadata;
+  prev = tmp_prev;
 */
   // now, metadata points to the first free slot
   // and prev is the previous entry.
+
   if (!metadata) {
     // There was no free slot available. We need to request a new memory region
     // from the system by calling mmap_from_system().
@@ -122,7 +121,6 @@ void *my_malloc(size_t size) {
     //     metadata
     //     <---------------------->
     //            buffer_size
-    //OSから借りてくる
     size_t buffer_size = 4096;
     my_metadata_t *metadata = (my_metadata_t *)mmap_from_system(buffer_size);
     metadata->size = buffer_size - sizeof(my_metadata_t);
@@ -130,7 +128,6 @@ void *my_malloc(size_t size) {
     // Add the memory region to the free list.
     my_add_to_free_list(metadata);
     // Now, try my_malloc() again. This should succeed.
-//    printf("==================================\n");
     return my_malloc(size);
   }
 
@@ -140,15 +137,7 @@ void *my_malloc(size_t size) {
   //     ^          ^
   //     metadata   ptr
   void *ptr = metadata + 1;
-//  printf("metadata_size(%zu) - size(%zu)\n",metadata->size, size);
-  size_t remaining_size = 0;
-  if(metadata->size >= size){
-    remaining_size = metadata->size - size;
-  }else{
-  //  printf("No enough memory:");
-  }
-  //printf("remaining_size:%zu\n",remaining_size);
-
+  size_t remaining_size = metadata->size - size;
   metadata->size = size;
   // Remove the free slot from the free list.
   my_remove_from_free_list(metadata, prev);
@@ -162,13 +151,12 @@ void *my_malloc(size_t size) {
     //                 <------><---------------------->
     //                   size       remaining size
     my_metadata_t *new_metadata = (my_metadata_t *)((char *)ptr + size);
-    new_metadata->size = remaining_size - sizeof(my_metadata_t); //remaining_sizeがおかしい
+    new_metadata->size = remaining_size - sizeof(my_metadata_t);
     new_metadata->next = NULL;
     // Add the remaining free slot to the free list.
     my_add_to_free_list(new_metadata);
   }
   return ptr;
-
 }
 
 // This is called every time an object is freed.  You are not allowed to
