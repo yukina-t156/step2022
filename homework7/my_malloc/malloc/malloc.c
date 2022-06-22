@@ -41,19 +41,22 @@ typedef struct my_heap_t {
 //
 // Free list bin に
 // my_heap_t my_heap; ->
-my_heap_t my_heaps[5];
+my_heap_t my_heaps[7];
 
 //
 // Helper functions (feel free to add/remove/edit!)
 //
 
 //sizeを入れると対応するfree_list_binの番号を返す
+//こことmy_heaps,for文の数字を変えればfree-list-binの分け方が変えられる
 int which_free_list(size_t size){
-  if(size < 256)return 0; //free_listの初期化が終わるまでは全て仮に0のリストに入れておく
-  else if(size < 512)return 1;
-  else if(size < 1024)return 2;
-  else if(size < 2048)return 3;
-  else return 4;
+  if(size < 64)return 0; //free_listの初期化が終わるまでは全て仮に0のリストに入れておく
+  else if(size < 128)return 1; //free_listの初期化が終わるまでは全て仮に0のリストに入れておく
+  else if(size < 256)return 2;
+  else if(size < 526)return 3;
+  else if(size < 782)return 4;
+  else if(size < 2048)return 5;
+  else return 6;
 }
 
 void my_add_to_free_list(my_metadata_t *metadata) {
@@ -65,7 +68,7 @@ void my_add_to_free_list(my_metadata_t *metadata) {
 }
 
 void my_remove_from_free_list(my_metadata_t *metadata, my_metadata_t *prev, int remove_bin) {
-  // うまくいかない
+//prev->size!=0を入れないとダミーで引っかかって変なとこに入る？
 //  printf("remove from bin %d(metadata->size:%zu)\n",remove_bin,metadata->size);
 
   if (prev&&prev->size!=0) {
@@ -81,7 +84,7 @@ void my_remove_from_free_list(my_metadata_t *metadata, my_metadata_t *prev, int 
 
 
 void print_bin_size(){
-  for(int i = 0;i<5;i++){
+  for(int i = 0;i<7;i++){
     int counter = 0;
     my_metadata_t *tmp = my_heaps[i].free_head;
 //    printf("--[%d]-------------\n",i);
@@ -105,7 +108,7 @@ void print_bin_size(){
 void my_initialize() {
 //  printf("(size < 256): 0\n(size < 512): 1\n(size < 1024): 2\n(size < 2048): 3\n2048<=size: 4\n");
   //全てのfree-list-binを初期化
-  for(int i = 0;i<5;i++){
+  for(int i = 0;i<7;i++){
     my_heaps[i].free_head = &my_heaps[i].dummy;
     my_heaps[i].dummy.size = 0;
     my_heaps[i].dummy.next = NULL;
@@ -132,7 +135,7 @@ void *my_malloc(size_t size) {
   my_metadata_t *tmp_prev = NULL;
 
   int remove_bin = -1;
-  for(int i = bin_num;i<5;i++){
+  for(int i = bin_num;i<7;i++){
     tmp_metadata = my_heaps[i].free_head;
     // bin_num番のfree_list_binから順に見ていく
     while (tmp_metadata){
