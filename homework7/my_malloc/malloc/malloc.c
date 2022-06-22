@@ -40,11 +40,20 @@ typedef struct my_heap_t {
 //
 // Free list bin に
 // my_heap_t my_heap; ->
-my_heap_t my_heaps[4];
+my_heap_t my_heaps[5];
 
 //
 // Helper functions (feel free to add/remove/edit!)
 //
+
+//sizeを入れると対応するfree_list_binの番号を返す
+int which_free_list(size_t size){
+  if(size < 256)return 0;
+  else if(size < 512)return 1;
+  else if(size < 1024)return 2;
+  else if(size < 2048)return 3;
+  else return 4;
+}
 
 void my_add_to_free_list(my_metadata_t *metadata) {
   assert(!metadata->next);
