@@ -38,7 +38,9 @@ typedef struct my_heap_t {
 //
 // Static variables (DO NOT ADD ANOTHER STATIC VARIABLES!)
 //
-my_heap_t my_heap;
+// Free list bin に
+// my_heap_t my_heap; ->
+my_heap_t my_heaps[4];
 
 //
 // Helper functions (feel free to add/remove/edit!)
@@ -46,15 +48,15 @@ my_heap_t my_heap;
 
 void my_add_to_free_list(my_metadata_t *metadata) {
   assert(!metadata->next);
-  metadata->next = my_heap.free_head;
-  my_heap.free_head = metadata;
+  metadata->next = my_heaps[0].free_head;
+  my_heaps[0].free_head = metadata;
 }
 
 void my_remove_from_free_list(my_metadata_t *metadata, my_metadata_t *prev) {
   if (prev) {
     prev->next = metadata->next;
   } else {
-    my_heap.free_head = metadata->next;
+    my_heaps[0].free_head = metadata->next;
   }
   metadata->next = NULL;
 }
@@ -65,9 +67,9 @@ void my_remove_from_free_list(my_metadata_t *metadata, my_metadata_t *prev) {
 
 // This is called at the beginning of each challenge.
 void my_initialize() {
-  my_heap.free_head = &my_heap.dummy;
-  my_heap.dummy.size = 0;
-  my_heap.dummy.next = NULL;
+  my_heaps[0].free_head = &my_heaps[0].dummy;
+  my_heaps[0].dummy.size = 0;
+  my_heaps[0].dummy.next = NULL;
 }
 
 // my_malloc() is called every time an object is allocated.
@@ -82,7 +84,7 @@ void *my_malloc(size_t size) {
 
   //ここを変えたい
   /*辿るポインタと別に保持しておくポインタを用意してみた*/
-  my_metadata_t *tmp_metadata = my_heap.free_head;
+  my_metadata_t *tmp_metadata = my_heaps[0].free_head;
   my_metadata_t *tmp_prev = NULL;
   while (tmp_metadata){
     if(tmp_metadata->size >= size){
@@ -97,17 +99,12 @@ void *my_malloc(size_t size) {
         prev = tmp_prev;
         }
       }
-//      break; //breakを消してみる
       } //whileの条件をこっちに持ってきた //まだちゃんと動く
     tmp_prev = tmp_metadata;
     tmp_metadata = tmp_metadata->next;
     //metadata->size >= size になった時終了
   }
-  //ここで実際使うmetadataへ渡す //動いた! 
-  /*
-  metadata = tmp_metadata;
-  prev = tmp_prev;
-*/
+  
   // now, metadata points to the first free slot
   // and prev is the previous entry.
 
