@@ -62,7 +62,7 @@ int which_free_list(size_t size){
 
 void my_add_to_free_list(my_metadata_t *metadata) {
   int bin_num = which_free_list(metadata->size);
-  printf("add to free list  list:%d, size:%zu\n",bin_num,metadata->size);
+//  printf("add to free list  list:%d, size:%zu\n",bin_num,metadata->size);
   assert(!metadata->next); //metadata->next!=NULLで強制終了
   metadata->next = my_heaps[bin_num].free_head;
   my_heaps[bin_num].free_head = metadata;
@@ -278,7 +278,7 @@ if(right!=NULL){
   if(!tmp_metadata){
   my_add_to_free_list(metadata);
   }else{
-    printf("connection!\n");
+//    printf("connection!\n");
     my_metadata_t *tmp = connect_right_free(metadata,tmp_metadata);
     my_remove_from_free_list(tmp_metadata,tmp_prev,which_free_list(right->size));
     my_add_to_free_list(tmp);
