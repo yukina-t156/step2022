@@ -77,9 +77,12 @@ void my_remove_from_free_list(my_metadata_t *metadata, my_metadata_t *prev) {
 
 // This is called at the beginning of each challenge.
 void my_initialize() {
-  my_heaps[0].free_head = &my_heaps[0].dummy;
-  my_heaps[0].dummy.size = 0;
-  my_heaps[0].dummy.next = NULL;
+  //全てのfree-listを初期化
+  for(int i = 0;i<5;i++){
+    my_heaps[i].free_head = &my_heaps[i].dummy;
+    my_heaps[i].dummy.size = 0;
+    my_heaps[i].dummy.next = NULL;
+  }
 }
 
 // my_malloc() is called every time an object is allocated.
