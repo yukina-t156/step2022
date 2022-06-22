@@ -48,7 +48,7 @@ my_heap_t my_heaps[5];
 
 //sizeを入れると対応するfree_list_binの番号を返す
 int which_free_list(size_t size){
-  if(size < 5000)return 0; //free_listの初期化が終わるまでは全て仮に0のリストに入れておく
+  if(size < 25600)return 0; //free_listの初期化が終わるまでは全て仮に0のリストに入れておく
   else if(size < 512)return 1;
   else if(size < 1024)return 2;
   else if(size < 2048)return 3;
@@ -77,7 +77,7 @@ void my_remove_from_free_list(my_metadata_t *metadata, my_metadata_t *prev) {
 
 // This is called at the beginning of each challenge.
 void my_initialize() {
-  //全てのfree-listを初期化
+  //全てのfree-list-binを初期化
   for(int i = 0;i<5;i++){
     my_heaps[i].free_head = &my_heaps[i].dummy;
     my_heaps[i].dummy.size = 0;
@@ -98,26 +98,34 @@ void *my_malloc(size_t size) {
   //ここを変えたい
   /*辿るポインタと別に保持しておくポインタを用意してみた*/
   int bin_num = which_free_list(size);
-  my_metadata_t *tmp_metadata = my_heaps[bin_num].free_head;
+  my_metadata_t *tmp_metadata = NULL;//対応するbinの先頭
   my_metadata_t *tmp_prev = NULL;
-  while (tmp_metadata){
-    if(tmp_metadata->size >= size){
-      if(!metadata){
-        //metadataがまだ一度も更新されていない時
-        metadata = tmp_metadata;
-        prev = tmp_prev;
-      }else{
-        if(tmp_metadata->size < metadata->size){
-        // 今見ているmetadataと更新されたmetadataを比べてサイズの小さい方を保持
-        metadata = tmp_metadata;
-        prev = tmp_prev;
+  
+  for(int i = bin_num;i<5;i++){
+    tmp_metadata = my_heaps[i].free_head;
+    // bin_num番のfree_list_binから順に見ていく
+    while (tmp_metadata){
+      if(tmp_metadata->size >= size){
+        if(!metadata){
+          //metadataがまだ一度も更新されていない時
+          metadata = tmp_metadata;
+          prev = tmp_prev;
+        }else{
+          if(tmp_metadata->size < metadata->size){
+            // 今見ているmetadataと更新されたmetadataを比べてサイズの小さい方を保持
+            metadata = tmp_metadata;
+            prev = tmp_prev;
+          }
         }
       }
-      } //whileの条件をこっちに持ってきた //まだちゃんと動く
-    tmp_prev = tmp_metadata;
-    tmp_metadata = tmp_metadata->next;
-    //metadata->size >= size になった時終了
-  }
+      tmp_prev = tmp_metadata;
+      tmp_metadata = tmp_metadata->next;
+      }
+
+      if(metadata){break;} //もし更新されなかったら次に大きいリストを見る
+    }
+
+
   
   // now, metadata points to the first free slot
   // and prev is the previous entry.
