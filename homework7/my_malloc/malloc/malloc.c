@@ -1,3 +1,4 @@
+// Free list binを実装したい
 //
 // >>>> malloc challenge! <<<<
 //
@@ -48,7 +49,7 @@ my_heap_t my_heaps[5];
 
 //sizeを入れると対応するfree_list_binの番号を返す
 int which_free_list(size_t size){
-  if(size < 25600)return 0; //free_listの初期化が終わるまでは全て仮に0のリストに入れておく
+  if(size < 256)return 0; //free_listの初期化が終わるまでは全て仮に0のリストに入れておく
   else if(size < 512)return 1;
   else if(size < 1024)return 2;
   else if(size < 2048)return 3;
@@ -60,15 +61,40 @@ void my_add_to_free_list(my_metadata_t *metadata) {
   int bin_num = which_free_list(metadata->size);
   metadata->next = my_heaps[bin_num].free_head;
   my_heaps[bin_num].free_head = metadata;
+//  printf("add to free list  list:%d, size:%zu\n",bin_num,metadata->size);
 }
 
-void my_remove_from_free_list(my_metadata_t *metadata, my_metadata_t *prev) {
-  if (prev) {
+void my_remove_from_free_list(my_metadata_t *metadata, my_metadata_t *prev, int remove_bin) {
+  // うまくいかない
+//  printf("remove from bin %d(metadata->size:%zu)\n",remove_bin,metadata->size);
+
+  if (prev&&prev->size!=0) {
+//    printf("prev is exist:(prev->size:%zu)\n",prev->size);
     prev->next = metadata->next;
-  } else {
-    my_heaps[which_free_list(metadata->size)].free_head = metadata->next;
   }
-  metadata->next = NULL;
+  else{
+    my_heaps[remove_bin].free_head = metadata->next; //metadataのsizeは変更後より、削除前のリストはprevで見なければいけない
+  }
+   metadata->next = NULL;
+//  printf("-------------------\n");
+}
+
+
+void print_bin_size(){
+  for(int i = 0;i<5;i++){
+    int counter = 0;
+    my_metadata_t *tmp = my_heaps[i].free_head;
+//    printf("--[%d]-------------\n",i);
+    while(tmp){
+      if(tmp->size!=0){
+//        printf("%zu ",tmp->size);
+        counter++;
+        }
+      tmp = tmp->next;
+    }
+//    printf("\nbin[%d]: %d free metadata!\n",i,counter); //dummy
+  }
+//  printf("========================\n");
 }
 
 //
@@ -77,12 +103,14 @@ void my_remove_from_free_list(my_metadata_t *metadata, my_metadata_t *prev) {
 
 // This is called at the beginning of each challenge.
 void my_initialize() {
+//  printf("(size < 256): 0\n(size < 512): 1\n(size < 1024): 2\n(size < 2048): 3\n2048<=size: 4\n");
   //全てのfree-list-binを初期化
   for(int i = 0;i<5;i++){
     my_heaps[i].free_head = &my_heaps[i].dummy;
     my_heaps[i].dummy.size = 0;
     my_heaps[i].dummy.next = NULL;
   }
+
 }
 
 // my_malloc() is called every time an object is allocated.
@@ -90,17 +118,20 @@ void my_initialize() {
 // 4000. You are not allowed to use any library functions other than
 // mmap_from_system() / munmap_to_system().
 void *my_malloc(size_t size) {
+//  printf("=======================\n");
+//  print_bin_size();
   my_metadata_t *metadata = NULL; //辿るポインタが別にあるのでNULLに
   my_metadata_t *prev = NULL;
   // First-fit: Find the first free slot the object fits.
   // TODO: Update this logic to Best-fit!
-
+ 
   //ここを変えたい
   /*辿るポインタと別に保持しておくポインタを用意してみた*/
   int bin_num = which_free_list(size);
   my_metadata_t *tmp_metadata = NULL;//対応するbinの先頭
   my_metadata_t *tmp_prev = NULL;
-  
+
+  int remove_bin = -1;
   for(int i = bin_num;i<5;i++){
     tmp_metadata = my_heaps[i].free_head;
     // bin_num番のfree_list_binから順に見ていく
@@ -122,9 +153,16 @@ void *my_malloc(size_t size) {
       tmp_metadata = tmp_metadata->next;
       }
 
-      if(metadata){break;} //もし更新されなかったら次に大きいリストを見る
+      if(metadata){
+//        printf("\nIn bin[%d]: (metadata size:%zu)",i,metadata->size);
+        remove_bin = i;
+        break;
+        } //もし更新されなかったら次に大きいリストを見る
     }
-
+/*    if(metadata)printf("found_metadata size: %zu\n",metadata->size);else{
+      printf("Not_found!\n");
+    }
+*/
 
   
   // now, metadata points to the first free slot
@@ -154,11 +192,13 @@ void *my_malloc(size_t size) {
   // ... | metadata | object | ...
   //     ^          ^
   //     metadata   ptr
+//  printf("-[remove]-----------------\n");
+//  printf("remove_bin : %d (metadata->size:%zu)\n",remove_bin,metadata->size);
   void *ptr = metadata + 1;
   size_t remaining_size = metadata->size - size;
   metadata->size = size;
   // Remove the free slot from the free list.
-  my_remove_from_free_list(metadata, prev);
+  my_remove_from_free_list(metadata, prev, remove_bin);//
 
   if (remaining_size > sizeof(my_metadata_t)) {
     // Create a new metadata for the remaining free slot.
@@ -172,8 +212,11 @@ void *my_malloc(size_t size) {
     new_metadata->size = remaining_size - sizeof(my_metadata_t);
     new_metadata->next = NULL;
     // Add the remaining free slot to the free list.
+//  printf("-[add (in my_malloc)]------------------\n");
+//  printf("metadata: size %zu  (add_to : %d)\n",new_metadata->size,which_free_list(new_metadata->size));
     my_add_to_free_list(new_metadata);
   }
+//  print_bin_size();
   return ptr;
 }
 
@@ -187,6 +230,8 @@ void my_free(void *ptr) {
   //     metadata   ptr
   my_metadata_t *metadata = (my_metadata_t *)ptr - 1;
   // Add the free slot to the free list.
+//  printf("-[add (in my_free)]------------------\n");
+//  printf("metadata: size %zu  (add_to : %d)\n",metadata->size,which_free_list(metadata->size));
   my_add_to_free_list(metadata);
 }
 
