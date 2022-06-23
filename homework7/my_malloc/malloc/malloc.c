@@ -52,16 +52,9 @@ my_heap_t my_heaps[10];
 //こことmy_heaps,for文の数字を変えればfree-list-binの分け方が変えられる
 //for文がprint_bin,my_initialize,my_mallocのmetadataを探す場所の三ヶ所
 int which_free_list(size_t size){
-  if(size < 16)return 0; //ここをsize<5000とかにすれば全て０に入りbin以外のデバッグに使えるかも
-  else if(size < 32)return 1; 
-  else if(size < 64)return 2;
-  else if(size < 128)return 3;
-  else if(size < 256)return 4;
-  else if(size < 512)return 5;
-  else if(size < 640)return 6;
-  else if(size < 1024)return 7;
-  else if(size < 2048)return 8;
-  else return 9;
+  if(size < 256)return 0; //ここをsize<5000とかにすれば全て０に入りbin以外のデバッグに使えるかも
+  else if(size < 512)return 1;
+  else return 2;
 }
 
 void my_add_to_free_list(my_metadata_t *metadata) {
@@ -130,7 +123,7 @@ void move_bin(my_metadata_t *prev, my_metadata_t *metadata, int now_bin){
 void my_initialize() {
 //  printf("(size < 256): 0\n(size < 512): 1\n(size < 1024): 2\n(size < 2048): 3\n2048<=size: 4\n");
   //全てのfree-list-binを初期化
-  for(int i = 0;i<10;i++){
+  for(int i = 0;i<3;i++){
     my_heaps[i].free_head = &my_heaps[i].dummy;
     my_heaps[i].dummy.size = 0;
     my_heaps[i].dummy.next = NULL;
@@ -156,7 +149,7 @@ void *my_malloc(size_t size) {
   my_metadata_t *tmp_prev = NULL;
 
   int remove_bin = -1;
-  for(int i = bin_num;i<10;i++){
+  for(int i = bin_num;i<3;i++){
     tmp_metadata = my_heaps[i].free_head;
     // bin_num番のfree_list_binから順に見ていく
     while (tmp_metadata){
@@ -167,20 +160,22 @@ void *my_malloc(size_t size) {
           prev = tmp_prev;
         }else{
           //24の時が一番高スコアだった
-          if(tmp_metadata->size < metadata->size && ((tmp_metadata->size - size > 24)||(tmp_metadata->size==size))){
+          if(tmp_metadata->size < metadata->size){
+            if((tmp_metadata->size - size > 24)||(tmp_metadata->size==size)){
             // 今見ているmetadataと更新されたmetadataを比べてサイズの小さい方を保持
             metadata = tmp_metadata;
             prev = tmp_prev;
+            }
           }
 
           //mergeの影響で他のリストに違う大きさのものが入ってたら移す
           //と思っていたが、addするときに関数内で処理されているのでいらなさそう
-         /*
+         
          if(which_free_list(tmp_metadata->size)!=i){
           //他のリストに移し替える
           move_bin(tmp_prev,tmp_metadata,i);
          }
-         */
+         
         }
       }
       tmp_prev = tmp_metadata;
