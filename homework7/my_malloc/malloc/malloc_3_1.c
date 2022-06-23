@@ -108,7 +108,6 @@ void print_bin_size(){
 
 void *connect_right_free(my_metadata_t *metadata1,my_metadata_t *metadata2){
   my_metadata_t *tmp= metadata1;
-  //binの変更はmallocで次にアクセスされる時にやる
   tmp->size = metadata1->size + metadata2->size + sizeof(my_metadata_t); //サイズを結合
   return tmp;
 }
