@@ -115,7 +115,9 @@ void *connect_right_free(my_metadata_t *metadata1,my_metadata_t *metadata2){
 
 void move_bin(my_metadata_t *prev, my_metadata_t *metadata, int now_bin){
   //metadataがサイズの違う場所にいる時
-  my_metadata_t *tmp = NULL;
+  //今の所出番はない?
+//  printf("move!");
+  my_metadata_t *tmp = metadata;
   tmp->size=metadata->size;
   tmp->next=NULL;
   my_add_to_free_list(tmp);
@@ -171,13 +173,14 @@ void *my_malloc(size_t size) {
             prev = tmp_prev;
           }
 
-          /*
-          mergeの影響をここらへんでいい感じにする
-          */
+          //mergeの影響で他のリストに違う大きさのものが入ってたら移す
+          //と思っていたが、addするときに関数内で処理されているのでいらなさそう
+         /*
          if(which_free_list(tmp_metadata->size)!=i){
           //他のリストに移し替える
           move_bin(tmp_prev,tmp_metadata,i);
          }
+         */
         }
       }
       tmp_prev = tmp_metadata;
@@ -283,7 +286,7 @@ void my_free(void *ptr) {
   if(!tmp_metadata){
   my_add_to_free_list(metadata);
   }else{
-//    printf("connection!\n");
+//    printf("connection! : ");
     my_metadata_t *tmp = connect_right_free(metadata,tmp_metadata);
     my_remove_from_free_list(tmp_metadata,tmp_prev,which_free_list(right->size));
     my_add_to_free_list(tmp);
