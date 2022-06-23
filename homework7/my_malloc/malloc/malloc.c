@@ -1,4 +1,5 @@
-// バグる
+// 空き領域をマージ(右)
+// Free-list-binがそんなに早くないから後で治す
 //
 // >>>> malloc challenge! <<<<
 //
@@ -29,7 +30,6 @@ void munmap_to_system(void *ptr, size_t size);
 typedef struct my_metadata_t {
   size_t size;
   struct my_metadata_t *next;
-  struct my_metadata_t *row_prev;
 } my_metadata_t;
 
 typedef struct my_heap_t {
@@ -70,14 +70,11 @@ void my_add_to_free_list(my_metadata_t *metadata) {
   assert(!metadata->next); //metadata->next!=NULLで強制終了
   metadata->next = my_heaps[bin_num].free_head;
   my_heaps[bin_num].free_head = metadata;
-  my_metadata_t *tmp = (char*) metadata + sizeof(my_metadata_t) + metadata->size; //領域として連続しているところにアクセスしたいが...
-  tmp->row_prev = metadata;
-  //printf("tmp size:%zu  row_prev size:%zu\n",tmp->size,tmp->row_prev->size);
 }
 
 void my_remove_from_free_list(my_metadata_t *metadata, my_metadata_t *prev, int remove_bin) {
 //prev->size!=0を入れないとダミーで引っかかって変なとこに入る？
-// printf("remove from bin %d(metadata->size:%zu)\n",remove_bin,metadata->size);
+//  printf("remove from bin %d(metadata->size:%zu)\n",remove_bin,metadata->size);
 
   if (prev&&prev->size!=0) {
 //    printf("prev is exist:(prev->size:%zu)\n",prev->size);
@@ -112,17 +109,6 @@ void print_bin_size(){
 void *connect_right_free(my_metadata_t *metadata1,my_metadata_t *metadata2){
   my_metadata_t *tmp= metadata1;
   tmp->size = metadata1->size + metadata2->size + sizeof(my_metadata_t); //サイズを結合
-  return tmp;
-}
-void *connect_left_free(my_metadata_t *metadata1,my_metadata_t *metadata2){
-  //metadata1:左 metadata2:右
-//  printf("=connect left====================\n");
- // printf("metadata1:size(%zu) metadata2:size(%zu)\n",metadata1->size,metadata2->size);
-  my_metadata_t *tmp= metadata1;
-  tmp->size = metadata1->size + metadata2->size + sizeof(my_metadata_t); //サイズを結合
-  tmp->next = NULL;
-  //printf("=> new size:(%zu)\n",tmp->size);
-  //printf("=================================\n");
   return tmp;
 }
 
@@ -164,7 +150,7 @@ void *my_malloc(size_t size) {
   // First-fit: Find the first free slot the object fits.
   // TODO: Update this logic to Best-fit!
  
-  /*辿るポインタと別に保持しておくポインタを用意*/
+  /*辿るポインタと別に保持しておくポインタを用意してみた*/
   int bin_num = which_free_list(size);
   my_metadata_t *tmp_metadata = NULL;//対応するbinの先頭
   my_metadata_t *tmp_prev = NULL;
@@ -180,25 +166,25 @@ void *my_malloc(size_t size) {
           metadata = tmp_metadata;
           prev = tmp_prev;
         }else{
-          if(tmp_metadata->size < metadata->size){
+          //24の時が一番高スコアだった
+          if(tmp_metadata->size < metadata->size && ((tmp_metadata->size - size > 24)||(tmp_metadata->size==size))){
             // 今見ているmetadataと更新されたmetadataを比べてサイズの小さい方を保持
             metadata = tmp_metadata;
             prev = tmp_prev;
           }
 
-          /*
-          mergeの影響をここらへんでいい感じにする
-          */
+          //mergeの影響で他のリストに違う大きさのものが入ってたら移す
+          //と思っていたが、addするときに関数内で処理されているのでいらなさそう
+         /*
          if(which_free_list(tmp_metadata->size)!=i){
           //他のリストに移し替える
           move_bin(tmp_prev,tmp_metadata,i);
          }
+         */
         }
       }
-
       tmp_prev = tmp_metadata;
       tmp_metadata = tmp_metadata->next;
-
       }
 
       if(metadata){
@@ -278,12 +264,10 @@ void my_free(void *ptr) {
   //     metadata   ptr
   my_metadata_t *metadata = (my_metadata_t *)ptr - 1;
   // Add the free slot to the free list.
- // printf("-[add (in my_free)]------------------\n");
+//  printf("-[add (in my_free)]------------------\n");
 //  printf("metadata: size %zu  (add_to : %d)\n",metadata->size,which_free_list(metadata->size));
 
   /*右側が空きか調べる*/
-
-/*
   my_metadata_t *right = (my_metadata_t *)((char *)ptr + metadata->size);
   my_metadata_t *tmp_metadata = NULL;//対応するbinの先頭
   my_metadata_t *tmp_prev = NULL;
@@ -297,53 +281,16 @@ void my_free(void *ptr) {
         }
         tmp_prev = tmp_metadata;
         tmp_metadata = tmp_metadata->next;
-      }
+    }
   }
   if(!tmp_metadata){
   my_add_to_free_list(metadata);
   }else{
-//    printf("connection!\n");
+//    printf("connection! : ");
     my_metadata_t *tmp = connect_right_free(metadata,tmp_metadata);
     my_remove_from_free_list(tmp_metadata,tmp_prev,which_free_list(right->size));
     my_add_to_free_list(tmp);
   }
-*/
-
-/*
-左側を調べる
-*/
-
-
-  my_metadata_t *left = metadata->row_prev;
-  my_metadata_t *tmp_metadata_l = NULL;//対応するbinの先頭
-  my_metadata_t *tmp_prev_l = NULL;
-  if(left!=NULL){
-//    printf("%zu ",left->size);
-      tmp_metadata_l = my_heaps[which_free_list(left->size)].free_head;
-      // bin_num番のfree_list_binから順に見ていく
-      while (tmp_metadata_l){
-        if(tmp_metadata_l==left){
-  //        printf("!!!!");
-          break;
-        }
-        tmp_prev_l = tmp_metadata_l;
-        tmp_metadata_l = tmp_metadata_l->next;
-      }
-  }
-
-  if(!tmp_metadata_l){
-  my_add_to_free_list(metadata);
-  }else{
-    //tmp_metadata_l!=NULL
- //   printf("connection! ");
- //   printf("left: size(%zu)\n",tmp_metadata_l->size);
-    my_metadata_t *tmp = connect_left_free(tmp_metadata_l,metadata);
-//    my_remove_from_free_list(tmp_metadata_l,tmp_prev_l,which_free_list(tmp->size));
-    move_bin(tmp_prev_l,tmp_metadata_l,which_free_list(tmp->size));
-    //付け替え失敗してそう
-//    my_add_to_free_list(tmp);
-  }
-//  my_add_to_free_list(metadata);
 
 }
 
