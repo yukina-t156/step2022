@@ -1,4 +1,4 @@
-// 空き領域をマージしたい
+// 空き領域をマージ(左)したい
 // Free-list-binがそんなに早くないから後で治す
 //
 // >>>> malloc challenge! <<<<
@@ -30,6 +30,7 @@ void munmap_to_system(void *ptr, size_t size);
 typedef struct my_metadata_t {
   size_t size;
   struct my_metadata_t *next;
+  struct my_metadata_t *row_prev;
 } my_metadata_t;
 
 typedef struct my_heap_t {
@@ -42,7 +43,7 @@ typedef struct my_heap_t {
 //
 // Free list bin に
 // my_heap_t my_heap; ->
-my_heap_t my_heaps[7];
+my_heap_t my_heaps[10];
 
 //
 // Helper functions (feel free to add/remove/edit!)
@@ -50,14 +51,18 @@ my_heap_t my_heaps[7];
 
 //sizeを入れると対応するfree_list_binの番号を返す
 //こことmy_heaps,for文の数字を変えればfree-list-binの分け方が変えられる
+//for文がprint_bin,my_initialize,my_mallocのmetadataを探す場所の三ヶ所
 int which_free_list(size_t size){
-  if(size < 64)return 0; //free_listの初期化が終わるまでは全て仮に0のリストに入れておく
-  else if(size < 128)return 1; //free_listの初期化が終わるまでは全て仮に0のリストに入れておく
-  else if(size < 256)return 2;
-  else if(size < 526)return 3;
-  else if(size < 782)return 4;
-  else if(size < 2048)return 5;
-  else return 6;
+  if(size < 16)return 0; //ここをsize<5000とかにすれば全て０に入りbin以外のデバッグに使えるかも
+  else if(size < 32)return 1; 
+  else if(size < 64)return 2;
+  else if(size < 128)return 3;
+  else if(size < 256)return 4;
+  else if(size < 512)return 5;
+  else if(size < 640)return 6;
+  else if(size < 1024)return 7;
+  else if(size < 2048)return 8;
+  else return 9;
 }
 
 void my_add_to_free_list(my_metadata_t *metadata) {
@@ -66,6 +71,8 @@ void my_add_to_free_list(my_metadata_t *metadata) {
   assert(!metadata->next); //metadata->next!=NULLで強制終了
   metadata->next = my_heaps[bin_num].free_head;
   my_heaps[bin_num].free_head = metadata;
+  my_metadata_t *tmp = metadata+sizeof(my_metadata_t) + metadata->size; //領域として連続しているところにアクセスしたいが...
+  tmp->row_prev = metadata;
 }
 
 void my_remove_from_free_list(my_metadata_t *metadata, my_metadata_t *prev, int remove_bin) {
@@ -86,7 +93,7 @@ void my_remove_from_free_list(my_metadata_t *metadata, my_metadata_t *prev, int 
 
 void print_bin_size(){
   //デバッグに使っていた
-  for(int i = 0;i<7;i++){
+  for(int i = 0;i<10;i++){
     int counter = 0;
     my_metadata_t *tmp = my_heaps[i].free_head;
     printf("--[%d]-------------\n",i);
@@ -103,6 +110,13 @@ void print_bin_size(){
 }
 
 void *connect_right_free(my_metadata_t *metadata1,my_metadata_t *metadata2){
+  my_metadata_t *tmp= metadata1;
+  //binの変更はmallocで次にアクセスされる時にやる
+  tmp->size = metadata1->size + metadata2->size + sizeof(my_metadata_t); //サイズを結合
+  return tmp;
+}
+void *connect_left_free(my_metadata_t *metadata1,my_metadata_t *metadata2){
+  //metadata1:左 metadata2:右
   my_metadata_t *tmp= metadata1;
   //binの変更はmallocで次にアクセスされる時にやる
   tmp->size = metadata1->size + metadata2->size + sizeof(my_metadata_t); //サイズを結合
@@ -125,7 +139,7 @@ void move_bin(my_metadata_t *prev, my_metadata_t *metadata, int now_bin){
 void my_initialize() {
 //  printf("(size < 256): 0\n(size < 512): 1\n(size < 1024): 2\n(size < 2048): 3\n2048<=size: 4\n");
   //全てのfree-list-binを初期化
-  for(int i = 0;i<7;i++){
+  for(int i = 0;i<10;i++){
     my_heaps[i].free_head = &my_heaps[i].dummy;
     my_heaps[i].dummy.size = 0;
     my_heaps[i].dummy.next = NULL;
@@ -151,7 +165,7 @@ void *my_malloc(size_t size) {
   my_metadata_t *tmp_prev = NULL;
 
   int remove_bin = -1;
-  for(int i = bin_num;i<7;i++){
+  for(int i = bin_num;i<10;i++){
     tmp_metadata = my_heaps[i].free_head;
     // bin_num番のfree_list_binから順に見ていく
     while (tmp_metadata){
@@ -260,20 +274,23 @@ void my_free(void *ptr) {
 //  printf("-[add (in my_free)]------------------\n");
 //  printf("metadata: size %zu  (add_to : %d)\n",metadata->size,which_free_list(metadata->size));
 
-/*右側が空きか調べる*/
-my_metadata_t *right = (my_metadata_t *)((char *)ptr + metadata->size);
-    my_metadata_t *tmp_metadata = NULL;//対応するbinの先頭
-    my_metadata_t *tmp_prev = NULL;
-if(right!=NULL){
-    tmp_metadata = my_heaps[which_free_list(right->size)].free_head;
-    // bin_num番のfree_list_binから順に見ていく
-    while (tmp_metadata){
-      if(tmp_metadata==right){
-        break;
+  /*右側が空きか調べる*/
+
+/*
+  my_metadata_t *right = (my_metadata_t *)((char *)ptr + metadata->size);
+  my_metadata_t *tmp_metadata = NULL;//対応するbinの先頭
+  my_metadata_t *tmp_prev = NULL;
+  if(right!=NULL){
+//    printf("%zu ",right->size);
+      tmp_metadata = my_heaps[which_free_list(right->size)].free_head;
+      // bin_num番のfree_list_binから順に見ていく
+      while (tmp_metadata){
+        if(tmp_metadata==right){
+          break;
+        }
+        tmp_prev = tmp_metadata;
+        tmp_metadata = tmp_metadata->next;
       }
-      tmp_prev = tmp_metadata;
-      tmp_metadata = tmp_metadata->next;
-  }
   }
   if(!tmp_metadata){
   my_add_to_free_list(metadata);
@@ -283,6 +300,39 @@ if(right!=NULL){
     my_remove_from_free_list(tmp_metadata,tmp_prev,which_free_list(right->size));
     my_add_to_free_list(tmp);
   }
+*/
+
+/*
+左側を調べる
+*/
+
+
+  my_metadata_t *left = metadata->row_prev;
+  my_metadata_t *tmp_metadata_l = NULL;//対応するbinの先頭
+  my_metadata_t *tmp_prev_l = NULL;
+  if(left!=NULL){
+//    printf("%zu ",left->size);
+      tmp_metadata_l = my_heaps[which_free_list(left->size)].free_head;
+      // bin_num番のfree_list_binから順に見ていく
+      while (tmp_metadata_l){
+        if(tmp_metadata_l==left){
+          break;
+        }
+        tmp_prev_l = tmp_metadata_l;
+        tmp_metadata_l = tmp_metadata_l->next;
+      }
+  }
+
+  if(!tmp_metadata_l){
+  my_add_to_free_list(metadata);
+  }else{
+    printf("connection!\n");
+    my_metadata_t *tmp = connect_left_free(tmp_metadata_l,metadata);
+    my_remove_from_free_list(tmp_metadata_l,tmp_prev_l,which_free_list(left->size));
+    //付け替え失敗してそう
+    my_add_to_free_list(tmp);
+  }
+//  my_add_to_free_list(metadata);
 
 }
 
