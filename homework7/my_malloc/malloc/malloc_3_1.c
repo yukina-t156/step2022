@@ -172,7 +172,7 @@ void *my_malloc(size_t size) {
           }
 
           /*
-          margeの影響をここらへんでいい感じにする
+          mergeの影響をここらへんでいい感じにする
           */
          if(which_free_list(tmp_metadata->size)!=i){
           //他のリストに移し替える
