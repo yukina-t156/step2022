@@ -1,3 +1,4 @@
+// How to make malloc
 // はじめに、metadataをポインタで繋いで...
 // ちくしょう！segmentation faultしやがった！お前はいつもそうだ。
 // このmallocはお前の人生そのものだ。お前はいつも失敗ばかりだ。
