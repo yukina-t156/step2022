@@ -42,7 +42,7 @@ typedef struct my_heap_t {
 //
 // Free list bin に
 // my_heap_t my_heap; ->
-my_heap_t my_heaps[10];
+my_heap_t my_heaps[3];
 
 //
 // Helper functions (feel free to add/remove/edit!)
@@ -161,7 +161,10 @@ void *my_malloc(size_t size) {
         }else{
           //24の時が一番高スコアだった
           if(tmp_metadata->size < metadata->size){
-            if((tmp_metadata->size - size > 24)||(tmp_metadata->size==size)){
+
+            //24だとchallenge3が50,challenge4が76
+            //16だとchallenge3が49,challenge4が77
+            if((tmp_metadata->size - size > 16)||(tmp_metadata->size==size)){
             // 今見ているmetadataと更新されたmetadataを比べてサイズの小さい方を保持
             metadata = tmp_metadata;
             prev = tmp_prev;
