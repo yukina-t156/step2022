@@ -6,6 +6,8 @@
 ## ./my_malloc/mallocに書いたファイルを追加
 - malloc_1.c : Best-fit
 - malloc_2.c : Free-list-bin
+- malloc_3_1.c : Right-merge
+- malloc_3_2.c : Left-merge (Not completed)
 
 ## docs  
 [malloc.c_read](https://docs.google.com/document/d/1PRZYNnSy5D96JMQll1I48Utjnmvg6kKWUlQSpD6TKHg/edit)  
