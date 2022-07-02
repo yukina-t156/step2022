@@ -1,0 +1,6 @@
+solver
+/visualizer/node_modules
+.python-version
+__py_cache__/*
+results
+solver_greedy
