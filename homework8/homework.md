@@ -88,3 +88,8 @@
 - 最適化がされていないから  
 - コンパイル言語の時は、連続データをあらかじめレジスタに読み込んでいるため、なるべく使用するデータが続いて使われるよう適切に入れ替えると早くなる
   - Pythonではプリフェッチがされないから遅い?  
+
+# homework3
+間に合わないかも  
+とりあえず分割して解こうとしたdocsです。  
+[TSP Challenge_docs](https://docs.google.com/document/d/1cTU4gAlQCq8ki9JUW1lYjEonZyIefjiLBuSEcyXy3gU/edit?usp=sharing)
