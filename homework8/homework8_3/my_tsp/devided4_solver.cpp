@@ -224,6 +224,8 @@ int main()
     for(int i = 0;i<cities.size();i++){
         devided_cities[(cities[i].second-min_y)/block_height][(cities[i].first-min_x)/block_width].push_back(i);
     }
+    /* 街が分割できてるかみる */
+    /*
     std::cout << "devided cities!" << std::endl;
     for(int i=0;i<N+1;i++){
         for(int j=0;j<N+1;j++){
@@ -234,7 +236,8 @@ int main()
             std::cout << std::endl << "---------------------" << std::endl;
         }
     }
-
+    */
+    
     /* 初期ブロック内部での貪欲な解 */
     std::vector<std::vector<std::vector<int> > > devided_tour(N+1,std::vector(N+1, std::vector<int>(0)));
     std::map<int, bool> visited;
@@ -245,8 +248,9 @@ int main()
             initialize(devided_cities[i][j],devided_tour[i][j],cities);
         }
     }
-    
 
+    /* 分割されてるか見てみる */
+    /*
     std::cout << "devided tour!" << std::endl;
     for(int i=0;i<N+1;i++){
         for(int j=0;j<N+1;j++){
@@ -257,6 +261,7 @@ int main()
             std::cout << std::endl << "---------------------" << std::endl;
         }
     }
+    */
 
     //一回で縦横1/2になる 1個になるまでやる! -> 全ブロックが各N回ずつ統合される -> 2重forぶん
     // 左上i,jを指定して[i][j],[i+1][j],[i][j+1],[i+1][j+1]を統合したtourを返す関数
@@ -274,6 +279,8 @@ int main()
             }
         }
     }
+    /*
+    なんかとりあえず出力してみる
     std::cout << "devided tour!" << std::endl;
     for(int i=0;i<N+1;i++){
         for(int j=0;j<N+1;j++){
@@ -284,6 +291,7 @@ int main()
             std::cout << std::endl << "---------------------" << std::endl;
         }
     }
+    */
     
     output::print_tour(tour,id,"devided");
 
